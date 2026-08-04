@@ -1,7 +1,7 @@
 import requests
 from django.core.management.base import BaseCommand
 from django.core.files.base import ContentFile
-from catalog.models import Movie, Genre, Language, Platform
+from catalog.models import Movie, Genre, Language, Platform, Actor
 
 class Command(BaseCommand):
     help = 'Fetch movies from TMDB API and load them into the database'
@@ -13,11 +13,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR("⚠️ STOP! You need to put your real TMDB API key in the script!"))
             return
 
-        # ==========================================
-        # NEW: Loop through pages 1 to 5 (100 movies)
-        # To get 1000 movies, change to range(1, 51)
-        # ==========================================
-        for page_number in range(1, 51):
+        for page_number in range(1, 56):
             self.stdout.write(f"\nFetching popular movies from TMDB (Page {page_number})...")
             
             url = f"https://api.themoviedb.org/3/movie/popular?api_key={API_KEY}&language=en-US&page={page_number}"
@@ -27,7 +23,6 @@ class Command(BaseCommand):
             for item in popular_movies:
                 movie_id = item['id']
                 
-                # UPDATE: We added "&append_to_response=credits" to the end of this URL
                 details_url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={API_KEY}&append_to_response=credits"
                 details = requests.get(details_url).json()
 
@@ -65,13 +60,17 @@ class Command(BaseCommand):
                         lang_obj, _ = Language.objects.get_or_create(name=lang_data['english_name'])
                         movie.languages.add(lang_obj)
                         
-                    # NEW: Get the top 5 cast members from the TMDB credits data
                     cast_data = details.get('credits', {}).get('cast', [])[:5]
-                    
-                    # We import Actor locally here to avoid circular imports at the top
-                    from catalog.models import Actor 
                     for actor_data in cast_data:
-                        actor_obj, _ = Actor.objects.get_or_create(name=actor_data['name'])
+                        actor_obj, actor_created = Actor.objects.get_or_create(name=actor_data['name'])
+                        
+                        if actor_created and actor_data.get('profile_path'):
+                            profile_url = f"https://image.tmdb.org/t/p/w200{actor_data['profile_path']}"
+                            profile_response = requests.get(profile_url)
+                            if profile_response.status_code == 200:
+                                file_name = f"actor_{actor_data['id']}.jpg"
+                                actor_obj.profile_image.save(file_name, ContentFile(profile_response.content), save=True)
+                        
                         movie.cast.add(actor_obj)
                 else:
                     self.stdout.write(self.style.WARNING(f"⚠️ Already exists: {movie.title}"))

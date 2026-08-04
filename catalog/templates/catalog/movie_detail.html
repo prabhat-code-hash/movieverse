@@ -24,7 +24,6 @@
         {% if movie.poster %}
         <div class="absolute inset-0 z-0 overflow-hidden">
             <img src="{{ movie.poster.url }}" alt="Background" class="w-full h-full object-cover opacity-30 blur-3xl saturate-[1.5] scale-110">
-            <!-- Gradient Overlay to blend into the black body -->
             <div class="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent"></div>
             <div class="absolute inset-0 bg-gradient-to-r from-black via-black/50 to-transparent"></div>
         </div>
@@ -33,7 +32,7 @@
         <div class="container mx-auto px-6 relative z-10">
             <div class="flex flex-col lg:flex-row gap-12 items-center lg:items-end">
                 
-                <!-- Poster: Floating with Glow -->
+                <!-- Poster -->
                 <div class="w-2/3 sm:w-1/2 lg:w-1/3 flex-shrink-0 group perspective">
                     {% if movie.poster %}
                         <img src="{{ movie.poster.url }}" alt="{{ movie.title }}" class="w-full rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.7)] ring-1 ring-white/10 transform transition duration-500 group-hover:scale-[1.02] group-hover:shadow-[0_0_40px_rgba(245,158,11,0.2)]">
@@ -47,45 +46,33 @@
                 <!-- Main Details Section -->
                 <div class="lg:w-2/3 flex flex-col space-y-6 pb-6 w-full">
                     
-                    <!-- Title, Year, Genres, Languages -->
                     <div>
                         <div class="flex flex-wrap items-center gap-3 mb-3">
                             <p class="text-amber-500 font-bold tracking-widest text-sm uppercase">{{ movie.release_date.year }}</p>
-                            
-                            <!-- Divider dot -->
                             <span class="text-white/20">•</span>
-                            
-                            <!-- Genre Loop -->
                             <div class="flex gap-2">
                                 {% for genre in movie.genres.all %}
                                     <span class="px-2 py-0.5 bg-white/10 backdrop-blur-sm border border-white/10 rounded-md text-xs font-medium text-slate-300">{{ genre.name }}</span>
                                 {% endfor %}
                             </div>
-                            
-                            <!-- Divider dot -->
                             <span class="text-white/20">•</span>
-                            
-                            <!-- Language Loop -->
                             <div class="flex gap-2">
                                 {% for lang in movie.languages.all %}
                                     <span class="px-2 py-0.5 bg-blue-500/10 backdrop-blur-sm border border-blue-500/20 rounded-md text-xs font-medium text-blue-300">{{ lang.name }}</span>
                                 {% endfor %}
                             </div>
                         </div>
-                        
                         <h1 class="text-5xl md:text-7xl font-black text-white leading-tight tracking-tighter">{{ movie.title }}</h1>
                     </div>
                     
                     <!-- Rating & Action Bar -->
                     <div class="flex flex-wrap items-center gap-6">
-                        <!-- Neon Rating Badge -->
                         <div class="flex items-center gap-2 bg-white/5 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full">
                             <span class="text-2xl">⭐</span>
                             <span class="text-xl font-bold text-white">{{ movie.average_rating }}</span>
                             <span class="text-slate-400 text-sm">/ 10</span>
                         </div>
 
-                        <!-- Modern Watchlist Button -->
                         {% if user.is_authenticated %}
                             <form action="{% url 'toggle_watchlist' movie.pk %}" method="POST">
                                 {% csrf_token %}
@@ -111,12 +98,12 @@
         </div>
     </div>
 
-    <!-- Additional Info Section: Grid Layout -->
+    <!-- Additional Info Section -->
     <div class="relative z-10 bg-black/80 backdrop-blur-3xl border-t border-white/5 pt-16 pb-24">
         <div class="container mx-auto px-6 max-w-7xl">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
                 
-                <!-- Left Column: Add-ons (Soundtrack & OTT) -->
+                <!-- Left Column -->
                 <div class="lg:col-span-1 space-y-10">
                     
                     <!-- Soundtrack -->
@@ -152,19 +139,35 @@
                             {% endfor %}
                         </div>
                     </div>
-                    <!-- NEW: Star Cast Section -->
-                    <div class="mt-10">
+
+                    <!-- Star Cast Section with Images -->
+                    <div>
                         <h3 class="text-2xl font-bold text-white mb-6 flex items-center gap-3">
                             <span class="bg-purple-500/20 text-purple-400 p-2 rounded-lg">🎭</span> Star Cast
                         </h3>
-                        <div class="flex flex-wrap gap-3">
+                        <div class="flex flex-wrap gap-4">
                             {% for actor in movie.cast.all %}
-                                <span class="px-4 py-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl text-sm font-medium text-slate-200 shadow-sm">{{ actor.name }}</span>
+                                <div class="flex flex-col items-center gap-2 group cursor-pointer">
+                                    <div class="w-16 h-16 rounded-full overflow-hidden border-2 border-white/10 shadow-lg relative group-hover:border-purple-500/50 transition-colors duration-300">
+                                        {% if actor.profile_image %}
+                                            <img src="{{ actor.profile_image.url }}" alt="{{ actor.name }}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
+                                        {% else %}
+                                            <div class="w-full h-full bg-white/5 backdrop-blur-md flex items-center justify-center text-white/50">
+                                                <span class="text-xl font-bold">{{ actor.name|make_list|first|upper }}</span>
+                                            </div>
+                                        {% endif %}
+                                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    </div>
+                                    <span class="text-xs font-medium text-slate-300 text-center max-w-[75px] leading-tight group-hover:text-white transition-colors">
+                                        {{ actor.name }}
+                                    </span>
+                                </div>
                             {% empty %}
                                 <p class="text-slate-600 font-light italic">No cast information available.</p>
                             {% endfor %}
                         </div>
                     </div>
+
                 </div>
 
                 <!-- Right Column: User Reviews -->
@@ -174,16 +177,13 @@
                         <span class="text-sm font-medium bg-white/10 text-slate-300 px-3 py-1 rounded-full">{{ movie.reviews.count }}</span>
                     </h2>
                     
-                    <!-- Write a Review Form -->
                     {% if user.is_authenticated %}
                         <div class="bg-gradient-to-br from-slate-900 to-black border border-slate-800 p-6 rounded-2xl mb-10 shadow-2xl relative overflow-hidden group">
-                            <!-- Subtle decorative glow -->
                             <div class="absolute -top-24 -right-24 w-48 h-48 bg-amber-500/10 blur-3xl rounded-full pointer-events-none"></div>
                             
                             <h4 class="text-lg font-bold text-white mb-4">Leave your thoughts</h4>
                             <form method="POST" class="relative z-10">
                                 {% csrf_token %}
-                                <!-- Styling the default django form container -->
                                 <div class="[&>p]:mb-4 [&>p>label]:block [&>p>label]:mb-2 [&>p>label]:text-sm [&>p>label]:text-slate-400 [&>p>input]:w-full [&>p>input]:bg-black/50 [&>p>input]:border [&>p>input]:border-slate-700 [&>p>input]:rounded-lg [&>p>input]:p-3 [&>p>input]:text-white [&>p>textarea]:w-full [&>p>textarea]:bg-black/50 [&>p>textarea]:border [&>p>textarea]:border-slate-700 [&>p>textarea]:rounded-lg [&>p>textarea]:p-3 [&>p>textarea]:text-white [&>p>select]:w-full [&>p>select]:bg-black/50 [&>p>select]:border [&>p>select]:border-slate-700 [&>p>select]:rounded-lg [&>p>select]:p-3 [&>p>select]:text-white">
                                     {{ form.as_p }}
                                 </div>
@@ -206,7 +206,6 @@
                             <div class="bg-white/[0.02] border border-white/[0.05] p-6 rounded-2xl hover:bg-white/[0.04] transition-colors">
                                 <div class="flex justify-between items-start mb-4">
                                     <div class="flex items-center gap-3">
-                                        <!-- Mock Avatar -->
                                         <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg">
                                             {{ review.user.username|make_list|first|upper }}
                                         </div>
