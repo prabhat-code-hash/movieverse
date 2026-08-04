@@ -102,11 +102,14 @@ DATABASES = {
     }
 }
 
-# If the cloud host provides a Database URL, use it!
+# If the cloud host provides a Database URL, use it with connection timeout handling
 database_url = os.environ.get("DATABASE_URL")
 if database_url:
-    DATABASES['default'] = dj_database_url.config(default=database_url, conn_max_age=600)
-
+    DATABASES['default'] = dj_database_url.config(
+        default=database_url, 
+        conn_max_age=0,  # <-- Change this from 600 to 0 so it opens a fresh connection every time and never times out!
+        ssl_require=True
+    )
 
 
 # Password validation
