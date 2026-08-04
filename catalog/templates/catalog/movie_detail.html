@@ -1,0 +1,237 @@
+{% load tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{ movie.title }} - My Mdb</title>
+    {% tailwind_css %}
+</head>
+<body class="bg-black text-slate-200 antialiased font-sans selection:bg-amber-500 selection:text-white min-h-screen">
+    
+    <!-- Transparent/Glassy Navbar -->
+    <nav class="fixed top-0 w-full z-50 bg-black/40 backdrop-blur-md border-b border-white/10 transition-all duration-300">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-600 tracking-tighter">My Mdb</h1>
+            <a href="{% url 'movie_list' %}" class="text-sm font-semibold text-slate-300 hover:text-white transition group flex items-center gap-2">
+                <span class="group-hover:-translate-x-1 transition-transform">&larr;</span> Back to Browse
+            </a>
+        </div>
+    </nav>
+
+    <!-- Immersive Cinematic Hero Section -->
+    <div class="relative w-full min-h-[90vh] flex items-center pt-20">
+        
+        <!-- Ambient Blurred Background -->
+        {% if movie.poster %}
+        <div class="absolute inset-0 z-0 overflow-hidden">
+            <img src="{{ movie.poster.url }}" alt="Background" class="w-full h-full object-cover opacity-30 blur-3xl saturate-[1.5] scale-110">
+            <!-- Gradient Overlay to blend into the black body -->
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-black via-black/50 to-transparent"></div>
+        </div>
+        {% endif %}
+
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="flex flex-col lg:flex-row gap-12 items-center lg:items-end">
+                
+                <!-- Poster: Floating with Glow -->
+                <div class="w-2/3 sm:w-1/2 lg:w-1/3 flex-shrink-0 group perspective">
+                    {% if movie.poster %}
+                        <img src="{{ movie.poster.url }}" alt="{{ movie.title }}" class="w-full rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.7)] ring-1 ring-white/10 transform transition duration-500 group-hover:scale-[1.02] group-hover:shadow-[0_0_40px_rgba(245,158,11,0.2)]">
+                    {% else %}
+                        <div class="w-full aspect-[2/3] bg-slate-900 rounded-2xl border border-slate-800 flex items-center justify-center shadow-2xl">
+                            <span class="text-slate-600 text-lg">No Poster Available</span>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Main Details Section -->
+                <div class="lg:w-2/3 flex flex-col space-y-6 pb-6 w-full">
+                    
+                    <!-- Title, Year, Genres, Languages -->
+                    <div>
+                        <div class="flex flex-wrap items-center gap-3 mb-3">
+                            <p class="text-amber-500 font-bold tracking-widest text-sm uppercase">{{ movie.release_date.year }}</p>
+                            
+                            <!-- Divider dot -->
+                            <span class="text-white/20">•</span>
+                            
+                            <!-- Genre Loop -->
+                            <div class="flex gap-2">
+                                {% for genre in movie.genres.all %}
+                                    <span class="px-2 py-0.5 bg-white/10 backdrop-blur-sm border border-white/10 rounded-md text-xs font-medium text-slate-300">{{ genre.name }}</span>
+                                {% endfor %}
+                            </div>
+                            
+                            <!-- Divider dot -->
+                            <span class="text-white/20">•</span>
+                            
+                            <!-- Language Loop -->
+                            <div class="flex gap-2">
+                                {% for lang in movie.languages.all %}
+                                    <span class="px-2 py-0.5 bg-blue-500/10 backdrop-blur-sm border border-blue-500/20 rounded-md text-xs font-medium text-blue-300">{{ lang.name }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <h1 class="text-5xl md:text-7xl font-black text-white leading-tight tracking-tighter">{{ movie.title }}</h1>
+                    </div>
+                    
+                    <!-- Rating & Action Bar -->
+                    <div class="flex flex-wrap items-center gap-6">
+                        <!-- Neon Rating Badge -->
+                        <div class="flex items-center gap-2 bg-white/5 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full">
+                            <span class="text-2xl">⭐</span>
+                            <span class="text-xl font-bold text-white">{{ movie.average_rating }}</span>
+                            <span class="text-slate-400 text-sm">/ 10</span>
+                        </div>
+
+                        <!-- Modern Watchlist Button -->
+                        {% if user.is_authenticated %}
+                            <form action="{% url 'toggle_watchlist' movie.pk %}" method="POST">
+                                {% csrf_token %}
+                                <button type="submit" class="relative group overflow-hidden px-8 py-3 rounded-full font-bold text-white bg-white/5 border border-white/10 hover:border-amber-500/50 transition-all duration-300">
+                                    <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-amber-500 to-orange-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    <span class="relative flex items-center gap-2">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                        Watchlist
+                                    </span>
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Synopsis Glass Panel -->
+                    <div class="bg-white/5 backdrop-blur-xl border border-white/10 p-6 rounded-2xl shadow-xl mt-4">
+                        <h3 class="text-white font-bold text-lg mb-2">Synopsis</h3>
+                        <p class="text-slate-300 leading-relaxed font-light text-lg">{{ movie.description }}</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Info Section: Grid Layout -->
+    <div class="relative z-10 bg-black/80 backdrop-blur-3xl border-t border-white/5 pt-16 pb-24">
+        <div class="container mx-auto px-6 max-w-7xl">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                
+                <!-- Left Column: Add-ons (Soundtrack & OTT) -->
+                <div class="lg:col-span-1 space-y-10">
+                    
+                    <!-- Soundtrack -->
+                    <div>
+                        <h3 class="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="bg-amber-500/20 text-amber-500 p-2 rounded-lg">🎵</span> Soundtrack
+                        </h3>
+                        <div class="space-y-3">
+                            {% for song in movie.songs.all %}
+                                <div class="group bg-slate-900/50 border border-slate-800 hover:border-amber-500/30 p-4 rounded-xl flex flex-col transition-all duration-300 hover:bg-slate-800">
+                                    <span class="font-bold text-slate-200 group-hover:text-white transition">{{ song.title }}</span>
+                                    <span class="text-sm text-slate-500">{{ song.singer }}</span>
+                                </div>
+                            {% empty %}
+                                <p class="text-slate-600 font-light italic">No soundtrack information available.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- OTT Platforms -->
+                    <div>
+                        <h3 class="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="bg-blue-500/20 text-blue-400 p-2 rounded-lg">📺</span> Streaming On
+                        </h3>
+                        <div class="flex flex-wrap gap-3">
+                            {% for platform in movie.platforms.all %}
+                                <a href="{{ platform.url }}" target="_blank" class="px-5 py-2.5 bg-white/5 border border-white/10 rounded-full text-sm font-semibold text-slate-300 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all duration-300 hover:-translate-y-1 shadow-lg flex items-center gap-2">
+                                    {{ platform.name }}
+                                    <svg class="w-4 h-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                </a>
+                            {% empty %}
+                                <p class="text-slate-600 font-light italic">Not currently available on streaming.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <!-- NEW: Star Cast Section -->
+                    <div class="mt-10">
+                        <h3 class="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="bg-purple-500/20 text-purple-400 p-2 rounded-lg">🎭</span> Star Cast
+                        </h3>
+                        <div class="flex flex-wrap gap-3">
+                            {% for actor in movie.cast.all %}
+                                <span class="px-4 py-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl text-sm font-medium text-slate-200 shadow-sm">{{ actor.name }}</span>
+                            {% empty %}
+                                <p class="text-slate-600 font-light italic">No cast information available.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: User Reviews -->
+                <div class="lg:col-span-2">
+                    <h2 class="text-3xl font-black text-white mb-8 flex items-center gap-3">
+                        Audience Reviews
+                        <span class="text-sm font-medium bg-white/10 text-slate-300 px-3 py-1 rounded-full">{{ movie.reviews.count }}</span>
+                    </h2>
+                    
+                    <!-- Write a Review Form -->
+                    {% if user.is_authenticated %}
+                        <div class="bg-gradient-to-br from-slate-900 to-black border border-slate-800 p-6 rounded-2xl mb-10 shadow-2xl relative overflow-hidden group">
+                            <!-- Subtle decorative glow -->
+                            <div class="absolute -top-24 -right-24 w-48 h-48 bg-amber-500/10 blur-3xl rounded-full pointer-events-none"></div>
+                            
+                            <h4 class="text-lg font-bold text-white mb-4">Leave your thoughts</h4>
+                            <form method="POST" class="relative z-10">
+                                {% csrf_token %}
+                                <!-- Styling the default django form container -->
+                                <div class="[&>p]:mb-4 [&>p>label]:block [&>p>label]:mb-2 [&>p>label]:text-sm [&>p>label]:text-slate-400 [&>p>input]:w-full [&>p>input]:bg-black/50 [&>p>input]:border [&>p>input]:border-slate-700 [&>p>input]:rounded-lg [&>p>input]:p-3 [&>p>input]:text-white [&>p>textarea]:w-full [&>p>textarea]:bg-black/50 [&>p>textarea]:border [&>p>textarea]:border-slate-700 [&>p>textarea]:rounded-lg [&>p>textarea]:p-3 [&>p>textarea]:text-white [&>p>select]:w-full [&>p>select]:bg-black/50 [&>p>select]:border [&>p>select]:border-slate-700 [&>p>select]:rounded-lg [&>p>select]:p-3 [&>p>select]:text-white">
+                                    {{ form.as_p }}
+                                </div>
+                                <button type="submit" class="mt-4 bg-white text-black font-bold py-3 px-8 rounded-full hover:bg-slate-200 transition-colors shadow-lg shadow-white/10">
+                                    Publish Review
+                                </button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <div class="bg-slate-900/50 border border-slate-800 rounded-2xl p-8 text-center mb-10">
+                            <h3 class="text-xl font-bold text-white mb-2">Have an opinion?</h3>
+                            <p class="text-slate-400 mb-6">Join the community to share your review.</p>
+                            <a href="{% url 'login' %}" class="inline-block bg-amber-500 text-black font-bold py-2 px-6 rounded-full hover:bg-amber-400 transition shadow-lg shadow-amber-500/20">Log In to Review</a>
+                        </div>
+                    {% endif %}
+
+                    <!-- Review List -->
+                    <div class="space-y-6">
+                        {% for review in movie.reviews.all %}
+                            <div class="bg-white/[0.02] border border-white/[0.05] p-6 rounded-2xl hover:bg-white/[0.04] transition-colors">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <!-- Mock Avatar -->
+                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg">
+                                            {{ review.user.username|make_list|first|upper }}
+                                        </div>
+                                        <div>
+                                            <span class="font-bold text-white block">{{ review.user.username }}</span>
+                                            <span class="text-xs text-slate-500 font-mono">User Review</span>
+                                        </div>
+                                    </div>
+                                    <div class="bg-black/50 border border-slate-800 text-amber-500 font-bold px-3 py-1 rounded-full text-sm flex items-center gap-1 shadow-inner">
+                                        ★ {{ review.rating }}/10
+                                    </div>
+                                </div>
+                                <p class="text-slate-300 leading-relaxed font-light">"{{ review.comment }}"</p>
+                            </div>
+                        {% empty %}
+                            <div class="text-center py-12 border border-dashed border-slate-800 rounded-2xl">
+                                <span class="text-4xl block mb-3 opacity-50">🍿</span>
+                                <p class="text-slate-500 font-light">No reviews yet. Be the first to share your thoughts!</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

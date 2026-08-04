@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head><title>{{ user.username }}'s Profile</title></head>
+<body>
+    <a href="{% url 'movie_list' %}">⬅ Back to Home</a>
+    
+    <h1>{{ user.username }}'s Profile</h1>
+
+    <h2>My Watchlist</h2>
+    <ul>
+        {% for movie in watchlist %}
+            <li><a href="{% url 'movie_detail' movie.pk %}">{{ movie.title }}</a></li>
+        {% empty %}
+            <li>Your watchlist is empty!</li>
+        {% endfor %}
+    </ul>
+
+    <h2>My Reviews</h2>
+    <ul>
+        {% for review in reviews %}
+            <li>
+                <strong><a href="{% url 'movie_detail' review.movie.pk %}">{{ review.movie.title }}</a></strong> 
+                - ⭐ {{ review.rating }}/10
+                <br> "{{ review.comment }}"
+            </li>
+        {% empty %}
+            <li>You haven't reviewed any movies yet.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
