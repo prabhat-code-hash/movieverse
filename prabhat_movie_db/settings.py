@@ -24,7 +24,7 @@ SECRET_KEY = os.environ.get('django-insecure-your-secret-key-from-settings-py')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 # Allow all hosts for now (we will restrict this to your specific domain later)
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['movieverse-y2nm.onrender.com', 'localhost', '127.0.0.1', '.onrender.com']
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
