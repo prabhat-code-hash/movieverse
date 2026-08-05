@@ -60,10 +60,12 @@ def movie_detail(request, pk):
             review.user = request.user       # Attach the logged-in user
             review.save()                    # Now save to database!
             return redirect('movie_detail', pk=movie.pk) # Refresh page
+        else:
+            print("FORM ERRORS:", form.errors)
     else:
         form = ReviewForm() # Show a blank form
     
-    context = {'movie': movie}
+    context = {'movie': movie,'form': form}
     return render(request, 'catalog/movie_detail.html', context)
 
 def toggle_watchlist(request, pk):

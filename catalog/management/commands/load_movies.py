@@ -13,7 +13,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR("⚠️ STOP! You need to put your real TMDB API key in the script!"))
             return
 
-        for page_number in range(1, 56):
+        for page_number in range(56, 66):
             self.stdout.write(f"\nFetching popular movies from TMDB (Page {page_number})...")
             
             url = f"https://api.themoviedb.org/3/movie/popular?api_key={API_KEY}&language=en-US&page={page_number}"
